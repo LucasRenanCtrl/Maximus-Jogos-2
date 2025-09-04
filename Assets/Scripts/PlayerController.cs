@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -15,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private float coyoteTimeCounter = 0;
     public float coyoteTime = 0.1f;
     private int airJumpCounter = 0;
-    public int maxAirJumps = 1;
+    private int maxAirJumps = 0;
 
     [Space(5)]
     [Header("Ground Check Settings")]
@@ -45,6 +47,11 @@ public class PlayerController : MonoBehaviour
     public Transform shootPosition;
     public float shootCooldown;
     private float lastShootTime = 0;
+
+    [Space(5)]
+    [Header("Upgrades")]
+    [SerializeField] List<UpgradeData> upgrades = new();
+
 
     private int playerHealth = 0;
     private float xAxis;
@@ -94,7 +101,16 @@ public class PlayerController : MonoBehaviour
         Jump();
         Shoot();
         StartDash();
+        PauseGame();
+        VerificarUpgrades();
+    }
 
+    private void PauseGame()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            HUDController.Instance.PausarJogo();
+        }
     }
 
     private void Flip()
@@ -333,5 +349,28 @@ public class PlayerController : MonoBehaviour
             spriteRenderer.color = Color.white;
             yield return new WaitForSeconds(blinkDuration);
         }
+    }
+
+
+    private void VerificarUpgrades()
+    {
+        if (upgrades.Count == 0) return;
+
+        foreach (UpgradeData upgrade in upgrades)
+        {
+            if (upgrade.comprado == true)
+            {
+                if (upgrade.nomeUpgrade == "PuloDuplo")
+                {
+                    EnableDoubleJump();
+                    upgrades.Remove(upgrade);
+                }
+            }
+        }
+    }
+
+    public void EnableDoubleJump()
+    {
+        maxAirJumps = 1;
     }
 }
