@@ -21,7 +21,7 @@ public class MenuUpgrades : MonoBehaviour
         {
             upgradePuloDuplo.comprado = true;
             botaoPuloDuplo.interactable = false;
-            Debug.Log("Pulo Duplo comprado!");
+            PlayerController.Instance.AdicionarUpgrade(upgradePuloDuplo);
         }
     }
 

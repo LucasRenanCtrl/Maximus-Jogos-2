@@ -410,7 +410,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 89779875}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1141839490}
+        m_TargetAssemblyTypeName: MenuUpgrades, Assembly-CSharp
+        m_MethodName: ComprarPuloDuplo
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &89779875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -894,7 +906,7 @@ GameObject:
   - component: {fileID: 260440355}
   - component: {fileID: 260440354}
   m_Layer: 5
-  m_Name: Background
+  m_Name: BackgroundHabilidades
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1619,7 +1631,7 @@ GameObject:
   - component: {fileID: 796374907}
   - component: {fileID: 796374906}
   - component: {fileID: 796374905}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Platform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4665,6 +4677,18 @@ PrefabInstance:
     - target: {fileID: 1314657335797631141, guid: 275d5dcd6f64b3a45a60c2eb53893847, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1314657335797631144, guid: 275d5dcd6f64b3a45a60c2eb53893847, type: 3}
+      propertyPath: maxAirJumps
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1314657335797631144, guid: 275d5dcd6f64b3a45a60c2eb53893847, type: 3}
+      propertyPath: groundCheckX
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1314657335797631144, guid: 275d5dcd6f64b3a45a60c2eb53893847, type: 3}
+      propertyPath: groundCheckY
+      value: 0.1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 275d5dcd6f64b3a45a60c2eb53893847, type: 3}

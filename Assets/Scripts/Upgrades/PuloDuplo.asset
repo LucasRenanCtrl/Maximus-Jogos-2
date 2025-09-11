@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nomeUpgrade: Pulo Duplo
   custoMoedas: 2
-  comprado: 0
+  ativado: 1
+  comprado: 1
   descricao: Permite ao jogador usar o pulo duplo

@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private float coyoteTimeCounter = 0;
     public float coyoteTime = 0.1f;
     private int airJumpCounter = 0;
-    private int maxAirJumps = 0;
+    [SerializeField] int maxAirJumps = 0;
 
     [Space(5)]
     [Header("Ground Check Settings")]
@@ -136,8 +136,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonUp("Jump") && rb.velocity.y > 0)
         {
             rb.velocity = new Vector2(rb.velocity.x, 0);
-
-            pState.jumping = false;
         }
 
         if (!pState.jumping)
@@ -146,14 +144,14 @@ public class PlayerController : MonoBehaviour
             {
                 rb.velocity = new Vector3(rb.velocity.x, jumpForce);
                 AudioManager.Instance.Play("Pulo");
+            }
 
-                pState.jumping = true;
-            }
-            else if (!IsGrounded() && airJumpCounter < maxAirJumps && Input.GetButtonDown("Jump"))
-            {
-                pState.jumping = true;
-                airJumpCounter++;
-            }
+        }
+        else if (airJumpCounter < maxAirJumps && Input.GetButtonDown("Jump"))
+        {
+            rb.velocity = new Vector3(rb.velocity.x, jumpForce);
+            AudioManager.Instance.Play("Pulo");
+            airJumpCounter++;
         }
 
         anim.SetBool("Jumping", !IsGrounded());
@@ -277,10 +275,12 @@ public class PlayerController : MonoBehaviour
             || Physics2D.Raycast(groundCheckPoint.position + new Vector3(groundCheckX, 0, 0), Vector2.down, groundCheckY, groundMask)
             || Physics2D.Raycast(groundCheckPoint.position + new Vector3(-groundCheckX, 0, 0), Vector2.down, groundCheckY, groundMask))
         {
+            pState.jumping = false;
             return true;
         }
         else
         {
+            pState.jumping = true;
             return false;
         }
     }
@@ -289,7 +289,6 @@ public class PlayerController : MonoBehaviour
     {
         if (IsGrounded())
         {
-            pState.jumping = false;
             coyoteTimeCounter = coyoteTime;
             airJumpCounter = 0;
         }
@@ -352,18 +351,23 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    public void AdicionarUpgrade(UpgradeData upgrade)
+    {
+        upgrades.Add(upgrade);
+    }
+
     private void VerificarUpgrades()
     {
         if (upgrades.Count == 0) return;
 
         foreach (UpgradeData upgrade in upgrades)
         {
-            if (upgrade.comprado == true)
+            if (upgrade.ativado == false)
             {
-                if (upgrade.nomeUpgrade == "PuloDuplo")
+                if (upgrade.nomeUpgrade == "Pulo Duplo")
                 {
                     EnableDoubleJump();
-                    upgrades.Remove(upgrade);
+                    upgrade.ativado = true;
                 }
             }
         }
