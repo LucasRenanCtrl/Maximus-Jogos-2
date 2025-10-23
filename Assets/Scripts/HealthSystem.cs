@@ -7,7 +7,7 @@ public class HealthSystem : MonoBehaviour
     public int maxHealth = 6; // Quantidade m�xima de sa�de (cada cora��o tem 2 unidades de vida)
     public int currentHealth;
 
-    void Start()
+    void Awake()
     {
         currentHealth = maxHealth; // Come�a com vida cheia
     }
@@ -18,7 +18,7 @@ public class HealthSystem : MonoBehaviour
         currentHealth -= damage;
         if (currentHealth < 0)
             currentHealth = 0;
-            
+
     }
 
     // M�todo para curar o jogador
@@ -27,7 +27,7 @@ public class HealthSystem : MonoBehaviour
         currentHealth += healAmount;
         if (currentHealth > maxHealth)
             currentHealth = maxHealth;
-            
+
     }
 
 }

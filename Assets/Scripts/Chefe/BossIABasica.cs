@@ -29,7 +29,7 @@ public class BossIABasica : MonoBehaviour
         switch (attackIndex)
         {
             case 0:
-                bossAtaques.ComecarPatrulha();
+                Debug.Log("Ataque 1: Espada!");
                 break;
             case 1:
                 Debug.Log("Ataque 2: Pulo!");

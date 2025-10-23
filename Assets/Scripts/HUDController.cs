@@ -32,7 +32,6 @@ public class HUDController : MonoBehaviour
 
     void Start()
     {
-        currentHealth = PlayerController.Instance.health.currentHealth;
         sistemaMoedas = GetComponent<SistemaMoedas>();
         menuPausa = GetComponentInChildren<MenuPausa>(includeInactive: true);
         UpdateHearts();

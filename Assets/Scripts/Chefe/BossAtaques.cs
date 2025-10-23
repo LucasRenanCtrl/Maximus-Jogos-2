@@ -1,60 +1,58 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+
+public enum BossState { Idle, ChooseAttack, Attacking, Recover }
 
 public class BossAtaques : MonoBehaviour
 {
     public Transform player;
-    
-    [Header("Patrulha")]
-    public Transform leftPoint;
-    public Transform rightPoint;
-    public float patrolSpeed = 2f;
-    private bool movingRight = true;
-    private bool patrolling = true;
 
-    [Header("Prefabs")]
-    public GameObject swordPrefab;
-    public GameObject aoePrefab;
-
-    [Header("Atributos")]
-    public float dashForce = 10f;
+    [Header("Aoe config")]
     public float aoeRadius = 3f;
-    public float swordSpeed = 8f;
-    public float swordReturnSpeed = 12f;
+    public float aoeDuration = 3f;
+    public int aoeDamage = 2;
+
+    public GameObject aoePrefab;
+    [Header("Sword config")]
+    public GameObject swordPrefab;
+
+    [Header("Dive config")]
+    public float dashForce = 10f;
+
+    private BossState currentState = BossState.Idle;
 
     private Rigidbody2D rb;
-    private GameObject spawnedSword;
-    private bool swordReturning = false;
+    private Animator anim;
+
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
     }
 
-    public void ComecarPatrulha()
+    public BossState GetState()
     {
-        patrolling = true;
+        return currentState;
     }
 
-    private void Patrulhar()
+    void Update()
     {
-        // Movimento entre dois pontos
-        if (movingRight)
+        if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            transform.position = Vector2.MoveTowards(transform.position,
-                                                     rightPoint.position,
-                                                     patrolSpeed * Time.deltaTime);
-            if (Vector2.Distance(transform.position, rightPoint.position) < 0.1f)
-                movingRight = false;
+            Debug.Log("DiagonalDive");
+            Attack_DiagonalDive();
         }
-        else
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            transform.position = Vector2.MoveTowards(transform.position,
-                                                     leftPoint.position,
-                                                     patrolSpeed * Time.deltaTime);
-            if (Vector2.Distance(transform.position, leftPoint.position) < 0.1f)
-                movingRight = true;
+            Debug.Log("Aoe");
+            Attack_AoE();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            Debug.Log("Espada");
+            Attack_ThrowSword();
         }
     }
 
@@ -63,78 +61,72 @@ public class BossAtaques : MonoBehaviour
     // 1. Investida Diagonal vinda do céu
     public void Attack_DiagonalDive()
     {
-        Vector2 direction = (player.position - transform.position).normalized;
-        rb.velocity = Vector2.zero; // reseta movimento antes
-        rb.AddForce(new Vector2(direction.x, -1f).normalized * dashForce, ForceMode2D.Impulse);
+        // Vector2 direction = (player.position - transform.position).normalized;
+        // rb.velocity = Vector2.zero; // reseta movimento antes
+        // rb.AddForce(new Vector2(direction.x, -1f).normalized * dashForce, ForceMode2D.Impulse);
 
-        Debug.Log("Boss faz investida diagonal do céu!");
+        // Debug.Log("Boss faz investida diagonal do céu!");
     }
 
     // 2. Explosão em área no ar
     public void Attack_AoE()
     {
-        // instanciar efeito visual de explosão
-        GameObject aoe = Instantiate(aoePrefab, transform.position, Quaternion.identity);
-        Destroy(aoe, 1.5f); // limpa depois de 1.5s
+        currentState = BossState.Attacking;
+        StartCoroutine(nameof(IenumeratorAOE));
+    }
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
-        foreach (Collider2D hit in hits)
+    IEnumerator IenumeratorAOE()
+    {
+        Vector2 destination = transform.position + Vector3.up * 3.5f;
+        rb.gravityScale = 0;//Corta a gravidade
+        rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
+
+
+        anim.Play("Pulo");
+        //Faz o boss pular
+        while (Vector2.Distance(transform.position, destination) > 1)
         {
-            if (hit.CompareTag("Player"))
-            {
-                Debug.Log("Player atingido pelo ataque em área!");
-                // Aqui chamaria o TakeDamage do player
-            }
+            transform.position = Vector2.Lerp(transform.position, destination, Time.deltaTime);
+            yield return null;
         }
+
+        anim.Play("Ataque Em Area");
+        // instanciar efeito visual de AOE
+        GameObject aoe = Instantiate(aoePrefab, transform.position, Quaternion.identity);
+        Destroy(aoe, aoeDuration - 0.5f);
+
+        float timer = 0;
+        while (timer < aoeDuration)
+        {
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
+            foreach (Collider2D hit in hits)
+            {
+                if (hit.CompareTag("Player"))
+                {
+                    hit.GetComponent<PlayerController>().TakeDamage(aoeDamage);
+                }
+            }
+
+            timer += 0.5f;
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        anim.Play("Idle");
+        rb.gravityScale = 1;//Volta a ter gravidade
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        currentState = BossState.Idle;
     }
 
     // 3. Arremesso da espada para frente e puxada de volta
     public void Attack_ThrowSword()
     {
-        if (spawnedSword == null) // só cria se não tiver uma já lançada
-        {
-            Vector2 direction = (player.position - transform.position).normalized;
-            spawnedSword = Instantiate(swordPrefab, transform.position, Quaternion.identity);
-            Rigidbody2D swordRb = spawnedSword.GetComponent<Rigidbody2D>();
-            swordRb.velocity = direction * swordSpeed;
+        // Vector2 direction = (player.position - transform.position).normalized;
 
-            Debug.Log("Boss lança a espada para frente!");
-            swordReturning = false;
-        }
-    }
+        // GameObject spawnedSword = Instantiate(swordPrefab, transform.position, Quaternion.identity);
+        // BossEspada espada = spawnedSword.GetComponent<BossEspada>();
 
-    void Update()
-    {
-        if (spawnedSword != null)
-        {
-            Rigidbody2D swordRb = spawnedSword.GetComponent<Rigidbody2D>();
-
-            if (!swordReturning)
-            {
-                // Se a espada já andou um certo tempo, começa a voltar
-                if (Vector2.Distance(transform.position, spawnedSword.transform.position) > 5f)
-                {
-                    swordReturning = true;
-                }
-            }
-            else
-            {
-                // Espada volta em direção ao boss
-                Vector2 dirBack = (transform.position - spawnedSword.transform.position).normalized;
-                swordRb.velocity = dirBack * swordReturnSpeed;
-
-                // Se chegou perto, destrói
-                if (Vector2.Distance(transform.position, spawnedSword.transform.position) < 0.5f)
-                {
-                    Destroy(spawnedSword);
-                    swordReturning = false;
-                    Debug.Log("Espada retornou ao boss!");
-                }
-            }
-        }else if (patrolling)
-        {
-            Patrulhar();
-        }
+        // espada.IniciarAtaque(transform, direction);
     }
 
     // Gizmo para visualizar área do ataque no editor
