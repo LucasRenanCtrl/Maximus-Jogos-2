@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -99,6 +97,11 @@ public class PlayerController : MonoBehaviour
         StartDash();
         PauseGame();
         VerificarUpgrades();
+        
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            GameManager.Instance.TremerCamera();
+        }
     }
 
     private void PauseGame()
@@ -309,6 +312,7 @@ public class PlayerController : MonoBehaviour
         health.TakeDamage(damage);
         HUDController.Instance.UpdateHearts(); // Atualiza o HUD dos corações
         AudioManager.Instance.Play("Dano");
+        GameManager.Instance.TremerCamera();
         StartCoroutine(BlinkCoroutine());
 
         if (health.currentHealth <= 0)
