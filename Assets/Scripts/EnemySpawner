@@ -1,0 +1,42 @@
+using UnityEngine;
+
+public class EnemySpawner : MonoBehaviour
+{
+    public GameObject enemyPrefab;
+    public float timeBetweenSpawns = 3f;
+    public int maxEnemiesAlive = 3;
+
+    private float timer;
+    private int enemiesAlive;
+
+    void Update()
+    {
+        timer += Time.deltaTime;
+
+        if (timer >= timeBetweenSpawns && enemiesAlive < maxEnemiesAlive)
+        {
+            SpawnEnemy();
+            timer = 0f;
+        }
+    }
+
+    void SpawnEnemy()
+    {
+        GameObject enemy = Instantiate(enemyPrefab, transform.position, Quaternion.identity);
+
+        EnemyLife enemyLife = enemy.GetComponent<EnemyLife>();
+        if (enemyLife != null)
+        {
+            enemyLife.spawner = this;
+        }
+
+        enemiesAlive++;
+    }
+
+    public void NotifyEnemyDied()
+    {
+        enemiesAlive--;
+        if (enemiesAlive < 0)
+            enemiesAlive = 0;
+    }
+}

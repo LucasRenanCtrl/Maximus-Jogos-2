@@ -46,6 +46,12 @@ public class PlayerController : MonoBehaviour
     public float shootCooldown;
     private float lastShootTime = 0;
 
+    [Header("Physics Materials")]
+    public PhysicsMaterial2D materialSemFriccao;
+    public PhysicsMaterial2D materialAltaFriccao;
+
+    private Collider2D col;
+
     [Space(5)]
     [Header("Upgrades")]
     [SerializeField] List<UpgradeData> upgrades = new();
@@ -80,6 +86,8 @@ public class PlayerController : MonoBehaviour
         health = GetComponent<HealthSystem>();
         playerHealth = health.currentHealth;
         gravity = rb.gravityScale;
+
+        col = GetComponent<Collider2D>();
     }
 
     // Update is called once per frame
@@ -97,7 +105,8 @@ public class PlayerController : MonoBehaviour
         StartDash();
         PauseGame();
         VerificarUpgrades();
-        
+        UpdateFrictionMaterial();
+
         if (Input.GetKeyDown(KeyCode.T))
         {
             GameManager.Instance.TremerCamera();
@@ -376,5 +385,26 @@ public class PlayerController : MonoBehaviour
     public void EnableDoubleJump()
     {
         maxAirJumps = 1;
+    }
+    void UpdateFrictionMaterial()
+    {
+        // Em movimento no chão → baixa fricção
+        if (Mathf.Abs(xAxis) > 0.01f && IsGrounded())
+        {
+            if (col.sharedMaterial != materialSemFriccao)
+                col.sharedMaterial = materialSemFriccao;
+        }
+        // Parado no chão → alta fricção (segura na rampa)
+        else if (IsGrounded())
+        {
+            if (col.sharedMaterial != materialAltaFriccao)
+                col.sharedMaterial = materialAltaFriccao;
+        }
+        // No ar → sem fricção (evitar grudar em paredes)
+        else
+        {
+            if (col.sharedMaterial != materialSemFriccao)
+                col.sharedMaterial = materialSemFriccao;
+        }
     }
 }
